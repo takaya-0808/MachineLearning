@@ -6,20 +6,6 @@ import slackbot_settings
 import requests
 import json
 
-"""
-@respond_to("こんにちわ")
-def greeting_1(messge):
-    messge.reply("こんにちわ!")
-
-@listen_to("コンニチワ")
-def greeting_2(messge):
-    messge.reply("コンニチワ")
-
-@listen_to("くんにちわ")
-def greeting_3(messge):
-    messge.reply("ボクはキリンです")
-"""
-
 @respond_to("Give me (.*)")
 def Create_nlp_tasks(message, params):
 
@@ -54,4 +40,3 @@ def Create_nlp_tasks(message, params):
         "attachments": json.dumps(msg)
     }
     res = requests.post(post_url, data=payload)
-    #message.send_webapi("NLPタスク研:", json.dumps(msg))
