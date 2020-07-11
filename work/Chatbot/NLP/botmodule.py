@@ -6,7 +6,7 @@ import slackbot_settings
 import requests
 import json
 
-@respond_to("Give me (.*)")
+@respond_to("nlp-post (.*)")
 def Create_nlp_tasks(message, params):
 
     send_user = message.channel._client.users[message.body['user']][u'name']
@@ -40,3 +40,6 @@ def Create_nlp_tasks(message, params):
         "attachments": json.dumps(msg)
     }
     res = requests.post(post_url, data=payload)
+
+
+
