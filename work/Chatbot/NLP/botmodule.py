@@ -6,7 +6,27 @@ import slackbot_settings
 import requests
 import json
 
-@respond_to("nlp-post (.*)")
+post_list = []
+
+@respond_to("nlp_help")
+def Help_nlp(message):
+    msg = [
+        {
+            "fields": [
+                {
+                    "value": "`nlp_post args[0] args[1] args[2] args[3] args[4]`\n args[0] = *タスク・分野*\n args[1] = *version*\n args[2] = *保存先URL*\n args[3] = *コメント*\n args[4] = *投稿時間*"
+                }
+            ]
+        }
+    ]
+    message.reply_webapi("",
+                        attachments=msg,
+                        as_user=True,
+                        in_thread=False)
+
+
+
+@respond_to("nlp_post (.*)")
 def Create_nlp_tasks(message, params):
 
     send_user = message.channel._client.users[message.body['user']][u'name']
@@ -33,6 +53,7 @@ def Create_nlp_tasks(message, params):
             ]
         }
     ]
+    post_list.append(msg)
 
     payload = {
         "token": slackbot_settings.API_TOKEN,
@@ -42,4 +63,7 @@ def Create_nlp_tasks(message, params):
     res = requests.post(post_url, data=payload)
 
 
-
+@respond_to("nlp-list")
+def Show_nlp_task(message):
+    for i in range(len(post_list)):
+        message.reply_webapi(attachments=i)
