@@ -7,8 +7,6 @@ import requests
 import json
 import markdown
 
-post_list = []
-
 @respond_to("nlp_help")
 def Help_nlp(message):
     msg = [
@@ -26,53 +24,38 @@ def Help_nlp(message):
                         in_thread=False)
 
 
-
+dict_post = {}                  
 @respond_to("nlp_post (.*)")
 def NlpPost(message, params):
 
     send_user = message.channel._client.users[message.body['user']][u'name']
     args = [row for row in csv.reader([params], delimiter=' ')][0]
     cmd = args.pop(0)
-    
-    if cmd == "-h":
-        msg = HelpPost()
-    elif cmd == "-r":
-        ReadPost()
-    elif cmd == "w":
-        args.append(send_user)
-        Writepost(args)
-    elif cmd == "u":
-        UpdatePost()
-    else:
-        message.reply(slackbot_settings.DEFAULT_REPLY)
-
+    print(cmd)
     post_url = "https://slack.com/api/chat.postMessage"
     channel = "# general"
-    msg = [
-        {
-            "title": "NLPタスク研　発表宣言",
-            "title_link": "https://docs.google.com/presentation/u/1/d/1lOhvruuxl1RiOZ_X5I5dhWuippm8Ay4_/edit#slide=id.g8c3f507bc5_0_10",  
-            "color": "#3104B4",
-            "fields": [
-                {
-                    "title": "担当者名",
-                    "value": send_user
-                },
-                {
-                    "title": "タスク・分野名",
-                    "value": "hoge"
-                },
-                {
-                    "title": "version",
-                    "value": "hoge"
-                },
-                {
-                    "title": "コメント",
-                    "value": "hoge"
-                }
-            ]
-        }
-    ]
+    
+    print(dict_post)
+    if cmd == "-h":
+        msg = HelpPost()
+
+    elif cmd == "-r":
+        channel_id = message.body['channel']
+        channel_info = message.channel._client.channels[channel_id]
+        channel = channel_info['name']
+        msg = ReadPost(send_user)
+    
+    elif cmd == "-w":
+        dict_post[send_user] = args
+        args.append(send_user)
+        msg = WritePost(args)
+
+    elif cmd == "-u":
+        
+        UpdatePost()
+
+    else:
+        message.reply(slackbot_settings.DEFAULT_REPLY)
 
     payload = {
         "token": slackbot_settings.API_TOKEN,
@@ -83,6 +66,7 @@ def NlpPost(message, params):
 
 
 def HelpPost():
+
     msg = [
         {
             "color": "#3104B4",
@@ -94,12 +78,14 @@ def HelpPost():
         }
     ]
     return msg
-def WritePost(args):
 
+def WritePost(args):
+    s = args[3]
+    print(args)
     msg = [
         {
             "title": "NLPタスク研　発表宣言",
-            "title_link": args[3],  
+            "title_link": s[1:len(args[3])-1],  
             "color": "#3104B4",
             "fields": [
                 {
@@ -121,43 +107,38 @@ def WritePost(args):
             ]
         }
     ]
-def ReadPost():
 
-def UpdatePost():
+def ReadPost(name):
 
+    dict_list = dict_post[name]
+    print(dict_list)
+    msg = [
+        {
+            "title": "NLPタスク研　発表宣言",
+            "title_link": dict_list[3],  
+            "color": "#3104B4",
+            "fields": [
+                {
+                    "value": "担当者名",
+                    "value": name
+                },
+                {
+                    "title": "タスク・分野名",
+                    "value": dict_list[0]
+                },
+                {
+                    "title": "version",
+                    "value": dict_list[1]
+                },
+                {
+                    "title": "コメント",
+                    "value": dict_list[2]
+                }
+            ]
+        }
+    ]
+    return msg
 
+def UpdatePost(args):
+    pass    
 
-@respond_to("nlp-list")
-def Show_nlp_task(message):
-    for i in range(len(post_list)):
-        message.reply_webapi(attachments=i)
-
-"""
-@respond_to("nlp_hoge")
-def markdown(message):
-    text = '''
-    # 【第9回】自然言語タスク研究会
-    ##############################################################
-    - 今週の会に投稿したい人は、
-        1. ↓ :hand: を押して下さい！
-        2. *Survey予定のタスク・分野名* を返信 して下さい。
-        - 〆切： 来週の水曜日 までに、
-        3. Google Drive に「元データ」「PDF」の アップロードお願いします。
-        4. このチャンネルに、【Survey 結果】 (テンプレ)    を投稿して下さい。
-    - 今週の会で 発表 したい人は、
-        1.　↓ :microphone: を押して下さい！
-            - 日曜 〆切。
-            -  Microsoft Teams で行います。
-            - 日〜水曜 の間で １時間くらいの予定。
-        2. 発表予定者は、来週の予定を ↓に入力お願いします...。
-            - Google スプレッドシート 
-                - 参加できない時間帯に名前を書く。
-    ############################################################## 
-    '''
-    slack = Slacker(slackbot_settings.API_TOKEN)
-
-    #md = markdown.Markdown() # ---(*1)
-    #html = md.convert(text) # ---(*2)
-    #print(html)
-    slack.chat.post_message('# general' text, as_user=True)
-"""
