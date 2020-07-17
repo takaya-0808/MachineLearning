@@ -31,12 +31,13 @@ def NlpPost(message, params):
     send_user = message.channel._client.users[message.body['user']][u'name']
     args = [row for row in csv.reader([params], delimiter=' ')][0]
     cmd = args.pop(0)
-    print(cmd)
     post_url = "https://slack.com/api/chat.postMessage"
     channel = "# general"
-    
-    print(dict_post)
+
     if cmd == "-h":
+        channel_id = message.body['channel']
+        channel_info = message.channel._client.channels[channel_id]
+        channel = channel_info['name']
         msg = HelpPost()
 
     elif cmd == "-r":
@@ -51,8 +52,7 @@ def NlpPost(message, params):
         msg = WritePost(args)
 
     elif cmd == "-u":
-        
-        UpdatePost()
+        msg = UpdatePost(args,send_user)
 
     else:
         message.reply(slackbot_settings.DEFAULT_REPLY)
@@ -72,7 +72,7 @@ def HelpPost():
             "color": "#3104B4",
             "fields": [
                 {
-                    "value": "`nlp_post `\n -r : Read NLP_post's content\n -u : Update NLP_post's content\n -h : Help message\n -w : Write NLP_post' content"
+                    "value": "`nlp_post`\n -r : Read NLP_post's content\n -u : Update NLP_post's content\n -h : Help message\n -w : Write NLP_post' content"
                 }
             ]
         }
@@ -80,8 +80,8 @@ def HelpPost():
     return msg
 
 def WritePost(args):
+
     s = args[3]
-    print(args)
     msg = [
         {
             "title": "NLPタスク研　発表宣言",
@@ -89,7 +89,7 @@ def WritePost(args):
             "color": "#3104B4",
             "fields": [
                 {
-                    "value": "担当者名",
+                    "title": "担当者名",
                     "value": args[4]
                 },
                 {
@@ -107,19 +107,19 @@ def WritePost(args):
             ]
         }
     ]
+    return msg
 
 def ReadPost(name):
 
     dict_list = dict_post[name]
-    print(dict_list)
     msg = [
         {
             "title": "NLPタスク研　発表宣言",
-            "title_link": dict_list[3],  
+            "title_link": dict_list[3], 
             "color": "#3104B4",
             "fields": [
                 {
-                    "value": "担当者名",
+                    "title": "担当者名",
                     "value": name
                 },
                 {
@@ -139,6 +139,43 @@ def ReadPost(name):
     ]
     return msg
 
-def UpdatePost(args):
-    pass    
+def UpdatePost(args,name):
+
+    dict_list = dict_post[name]
+    cmd = args.pop(0)
+    if cmd == "-T":
+        dict_list[0] = args[0]
+    elif cmd == "-V":
+        dict_list[1] = args[0]
+    elif cmd == "-C":
+        dict_list[2] = args[0]
+    else:
+        return {"title": "None"}
+
+    msg = [
+        {
+            "title": "NLPタスク研　発表宣言",
+            "title_link": dict_list[3], 
+            "color": "#3104B4",
+            "fields": [
+                {
+                    "title": "担当者名",
+                    "value": name
+                },
+                {
+                    "title": "タスク・分野名",
+                    "value": dict_list[0]
+                },
+                {
+                    "title": "version",
+                    "value": dict_list[1]
+                },
+                {
+                    "title": "コメント",
+                    "value": dict_list[2]
+                }
+            ]
+        }
+    ]
+    return msg
 
