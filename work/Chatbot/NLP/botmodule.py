@@ -7,23 +7,6 @@ import requests
 import json
 import markdown
 
-@respond_to("nlp_help")
-def Help_nlp(message):
-    msg = [
-        {
-            "fields": [
-                {
-                    "value": "`nlp_post args[0] args[1] args[2] args[3]`\n args[0] = *タスク・分野*\n args[1] = *version*\n args[2] = *コメント*\n args[3] = *保存先URL*"
-                }
-            ]
-        }
-    ]
-    message.reply_webapi("",
-                        attachments=msg,
-                        as_user=True,
-                        in_thread=False)
-
-
 dict_post = {}                  
 @respond_to("nlp_post (.*)")
 def NlpPost(message, params):
